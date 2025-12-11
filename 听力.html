@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEFL Listening Simulation</title>
+    <style>
+        /* * CSS 设计说明 (For Designer):
+         * 1. 变量定义 (:root): 方便统一管理你喜欢的绿色和橙色。
+         * 2. Flexbox: 用于居中布局，这是网页设计最常用的布局方式。
+         * 3. 极简风格: 去除多余阴影，使用大色块和清晰的字体。
+         */
+        :root {
+            --primary-green: #2E8B57; /* 森林绿：沉稳、学术 */
+            --accent-orange: #FF8C00; /* 活力橙：强调、行动点 */
+            --bg-color: #F9F9F9;      /* 极简灰白背景 */
+            --text-main: #333333;
+            --text-light: #666666;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航栏 - 模仿考试顶部条 */
+        header {
+            background-color: #fff;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: 60px;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; color: var(--primary-green); letter-spacing: 1px; }
+
+        /* 计时器组件 */
+        #timer {
+            font-family: 'Courier New', monospace; /* 等宽字体模仿数字钟 */
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        /* 主内容区域 */
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 容器卡片 */
+        .container {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        /* 1. 选题页面样式 */
+        .grid-menu {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+        
+        .menu-btn {
+            background: white;
+            border: 2px solid var(--primary-green);
+            color: var(--primary-green);
+            padding: 20px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .menu-btn:hover {
+            background: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* 2. 做题页面样式 */
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .option-item {
+            display: flex;
+            align-items: flex-start; /* 顶部对齐 */
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .option-item:hover {
+            background-color: #f0fdf4; /* 极淡的绿色 */
+        }
+
+        /* 隐藏原生 radio/checkbox，自定义样式 */
+        .option-item input {
+            margin-right: 15px;
+            margin-top: 5px;
+            accent-color: var(--primary-green); /* 修改浏览器默认控件颜色 */
+            transform: scale(1.2);
+        }
+
+        /* 3. 底部控制栏 */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            justify-content: flex-end;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-orange);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 4px; /* TOEFL 按钮通常比较方 */
+            cursor: pointer;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        /* 4. 结果页样式 */
+        .result-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+        }
+        .correct { color: var(--primary-green); font-weight: bold; }
+        .wrong { color: #d32f2f; font-weight: bold; }
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            background: #f4f4f4;
+            padding: 10px;
+            border-left: 3px solid var(--accent-orange);
+        }
+
+        /* 辅助类 */
+        .hidden { display: none !important; }
+        .tag {
+            background: var(--primary-green);
+            color: white;
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>TOEFL LISTENING</h1>
+        <div id="timer">00:00</div>
+    </header>
+
+    <main>
+        <div id="section-menu" class="container">
+            <h2 style="text-align:center; margin-bottom:30px;">Select a Passage</h2>
+            <div class="grid-menu">
+                <button class="menu-btn" onclick="startQuiz('C1')">C1 (Conversation)</button>
+                <button class="menu-btn" onclick="startQuiz('L1')">L1 (Art History)</button>
+                <button class="menu-btn" onclick="startQuiz('L2')">L2 (Paleontology)</button>
+                <button class="menu-btn" onclick="startQuiz('C2')">C2 (Bio Lab)</button>
+                <button class="menu-btn" onclick="startQuiz('L3')">L3 (Acting)</button>
+            </div>
+            <p style="text-align:center; margin-top:20px; color:#999; font-size:0.9rem;">
+                Based on TPO75 Transcripts
+            </p>
+        </div>
+
+        <div id="quiz-interface" class="container hidden">
+            <div class="tag" id="question-tag">Question 1 of 5</div>
+            <div class="question-text" id="question-text">
+                Loading...
+            </div>
+            <div class="options-list" id="options-container">
+                </div>
+            <div class="controls">
+                <button class="btn-primary" onclick="nextQuestion()">Next</button>
+            </div>
+        </div>
+
+        <div id="result-interface" class="container hidden">
+            <h2 style="color: var(--primary-green);">Results</h2>
+            <p id="score-display" style="font-size:1.2rem; font-weight:bold;"></p>
+            <div id="review-list">
+                </div>
+            <div class="controls">
+                <button class="btn-primary" onclick="location.reload()">Back to Menu</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        /**
+         * 数据区：完全基于你上传的 PDF 解析提取
+         * 为了方便管理，使用 JSON 对象存储
+         */
+        const toeflData = {
+            "C1": {
+                title: "Conversation 1: Literacy Program",
+                questions: [
+                    {
+                        id: 1,
+                        text: "Why does the woman wish to speak to the student?",
+                        options: [
+                            "To notify him about an award that he will be receiving",
+                            "To offer assistance with a program he runs",
+                            "To ask him to start a literacy program at the university",
+                            "To learn more about his accomplishments as a volunteer"
+                        ],
+                        correct: [3], // D (Index starts at 0: A=0, B=1, C=2, D=3)
+                        reason: "原文提到: 'The reason I asked you to come in today was to discuss the community achievement award... Could you tell me more? It's for a news release.' "
+                    },
+                    {
+                        id: 2,
+                        text: "How does the student feel about the possibility of being mentioned in the city newspaper?",
+                        options: [
+                            "He is proud that he would be able to promote his university to the public at large",
+                            "He is excited that his literacy program would receive some publicity",
+                            "He is confused because he does not think readers...",
+                            "He is uncomfortable because he is one of several volunteers..."
+                        ],
+                        correct: [1], // B
+                        reason: "原文提到: 'Wow, cool... It'll bring so much publicity to our program.' "
+                    },
+                    {
+                        id: 3,
+                        text: "How did the award committee become aware of the student?",
+                        options: [
+                            "The student submitted a description...",
+                            "The director of the community center recommended him for an award.",
+                            "The committee received a news release...",
+                            "The student asked a committee member..."
+                        ],
+                        correct: [1], // B
+                        reason: "原文提到: 'No, the director nominated me.' "
+                    },
+                    {
+                        id: 4,
+                        text: "What can be inferred about the student? (Click on 3 answers)",
+                        type: "multi",
+                        options: [
+                            "He works full time at the community center.",
+                            "He enjoys helping other people",
+                            "He is easily discouraged.",
+                            "He is persuasive.",
+                            "He is resourceful."
+                        ],
+                        correct: [1, 3, 4], // B, D, E (对应 PDF 答案 BDE)
+                        reason: "推断依据: 他做志愿者(B); 他说服了许多人包括家人参与(D); 他利用奖金买物资并计划招聘(E)。"
+                    },
+                    {
+                        id: 5,
+                        text: "Why does the woman say this: 'I think I've got enough for the release now.'",
+                        options: [
+                            "To apologize for not telling him the purpose...",
+                            "To apologize for underestimating the extent...",
+                            "To ask him to clarify the meaning...",
+                            "To indicate that she disagrees..." // 这里的选项似乎有点奇怪，按PDF答案选C
+                        ], 
+                        // 注意：PDF原文答案显示是 C。但在原文末尾 context 中，
+                        // Q5 选项实际上是针对重听题。PDF里Q5的选项文字似乎不完整，
+                        // 但根据标准答案 C (To ask him to clarify...) 或根据上下文结束对话。
+                        // 修正：根据 PDF 最后一页答案 DBB(BDE)C。 第5题选C。
+                        // 原文 Q5 选项 C: "To ask him to clarify the meaning of his last statement"
+                        correct: [2], 
+                        reason: "标准答案为 C。通常这类重听题是用于转换话题或结束当前话题。"
+                    }
+                ]
+            },
+            "L1": {
+                title: "Lecture 1: Art History (Hatshepsut)",
+                questions: [
+                    {
+                        id: 1,
+                        text: "What does the professor mainly discuss? (Click on 2 answers)",
+                        type: "multi",
+                        options: [
+                            "A powerful and unusual ruler of Egypt",
+                            "Military actions during the New Kingdom...",
+                            "How Hatshepsut's statue differs from those of other pharaohs",
+                            "What the features of a pharaoh's statue represent"
+                        ],
+                        correct: [0, 3], // A, D (PDF答案 AD)
+                        reason: "教授讨论了 Hatshepsut 这位非凡的统治者(A)以及她的雕像特征代表了什么(D)。"
+                    },
+                    {
+                        id: 2,
+                        text: "What does the professor imply about the 'material culture' of ancient societies?",
+                        options: [
+                            "It is considered more reliable...",
+                            "It is the only source of information about certain societies.",
+                            "Most of it was created by unskilled workers.",
+                            "Its artistic value is greater..."
+                        ],
+                        correct: [1], // B
+                        reason: "原文: '...physical objects archaeologists uncover is a major type of evidence. And in some cases, the only type' "
+                    },
+                    {
+                        id: 3,
+                        text: "What important distinction does the professor make between Hatshepsut and previous queens?",
+                        options: [
+                            "She was the first queen to reign with the king",
+                            "She was the first queen to rule as regent-protector...",
+                            "She was the first queen to declare herself pharaoh.",
+                            "She was the first queen whose image appeared..."
+                        ],
+                        correct: [2], // C
+                        reason: "原文: 'She adopted the title of pharaoh... which was the title that only the kings of Egypt had used' "
+                    },
+                    {
+                        id: 4,
+                        text: "What does the professor imply about the image of Hatshepsut wearing the nemes?",
+                        options: [
+                            "She wore the nemes to indicate her devotion...",
+                            "She wore the nemes as a symbol of her royal power.",
+                            "She wore the nemes to indicate that she was female.",
+                            "She wore the nemes in public only rarely"
+                        ],
+                        correct: [1], // B
+                        reason: "原文: 'wearing the distinctive headcloth called the nemes, a symbol of royal authority.' "
+                    },
+                    {
+                        id: 5,
+                        text: "According to the professor, what does Hatshepsut's hand gesture in the statue represent?",
+                        options: [
+                            "Hatshepsut's military strength",
+                            "Hatshepsut's absolute political authority",
+                            "Hatshepsut's spiritual role",
+                            "Hatshepsut's tolerance of different religions"
+                        ],
+                        correct: [2], // C
+                        reason: "原文: 'They emphasize this role... spiritual go between' "
+                    },
+                    {
+                        id: 6,
+                        text: "Why does the professor say this (replayed audio)?",
+                        options: [
+                            "To apologize for a mistake she just made",
+                            "To briefly clarify a statement she made...",
+                            "To ask if the students have questions...",
+                            "To introduce a topic that is not related..."
+                        ],
+                        correct: [3], // D
+                        reason: "通常这种 'If I can just ask you to indulge me for a moment' 是为了引入一个稍微偏离主线但重要的额外话题。"
+                    }
+                ]
+            },
+            "L2": {
+                title: "Lecture 2: Paleontology",
+                questions: [
+                    { id: 1, text: "What is the main purpose of the lecture?", options: ["To determine the age of the planet Earth", "To debate opposing theories of how life originated", "To consider ways to determine when life on Earth began", "To explain the process that formed the fossils"], correct: [2], reason: "Answer: C. 原文开头提出: 'what we'd like to know... is how long after that did life begin on earth?'" },
+                    { id: 2, text: "What is the professor's attitude toward the claim that life first appeared 3.5 billion years ago?", options: ["She is confident...", "She believes it is likely that living organisms existed long before that time", "She is concerned...", "She doubts that fossilized rocks..."], correct: [1], reason: "Answer: B. 教授提到地球早期没有化石留存，暗示生命可能开始得更早，只是记录被抹去了。" },
+                    { id: 3, text: "Why does the professor mention the violent processes that Earth underwent?", options: ["To explain how Earth acquired...", "To provide an alternative explanation...", "To show why it took so long...", "To explain why it is unlikely that the earliest fossil specimens have survived"], correct: [3], reason: "Answer: D. 原文: 'rocks pre dating that first fossil would have been crushed and very likely melted.' " },
+                    { id: 4, text: "Why does the professor think paleontologists should study the Moon?", options: ["Its condition is similar...", "It may contain Earth's most ancient surviving rocks.", "It is not affected...", "It may provide clues..."], correct: [1], reason: "Answer: B. 原文: 'tons of earth rocks would have been tossed up... ended up on the moon.' " },
+                    { id: 5, text: "If it is proven that life appeared soon after Earth was formed, what further conclusion might this support?", options: ["The universe is likely to contain many other Earth-like planets", "Living organisms are capable of surviving extreme conditions.", "Life probably exists in other parts of the universe", "Oceans may have covered Earth earlier..."], correct: [2], reason: "Answer: C. 原文: 'suggest that life is easily generated. And so it can probably be found all over the universe.' " },
+                    { id: 6, text: "What does the professor imply when she says this?", options: ["Liquid water is the primary necessity...", "Earth's temperature is not relevant...", "Liquid water could have formed on other planets...", "The student should consider a variety of conditions..."], correct: [0], reason: "Answer: A. 教授把 'support life' 重述为 'water could exist in liquid form' 。" }
+                ]
+            },
+            "C2": {
+                title: "Conversation 2: Student & Advisor",
+                questions: [
+                    { id: 1, text: "What does the student try to explain to her adviser?", options: ["Why her experiment produced unexpected results", "Why she did not finish her experiment on time", "What properties of the RP73 protein...", "Why she needs to have her grade changed"], correct: [1], reason: "Answer: B. 学生解释实验失败导致无法按时交作业（Incomplete grade）。" },
+                    { id: 2, text: "Why does the student want to study the RP73 protein?", options: ["Because it has an unusually rapid rate...", "Because it was only recently discovered", "Because it may have medical applications", "Because it may play a role..."], correct: [2], reason: "Answer: C. 原文: 'potential therapeutic value... applied in a medical context?' " },
+                    { id: 3, text: "Under what circumstance might her experiment have been saved?", options: ["If the lab incubator...", "If the experiment had not stayed in the freezer...", "If she had better understood...", "If someone had been in the laboratory when she telephoned"], correct: [3], reason: "Answer: D. 原文: 'Now I'm really panicking and I think I'll try to phone it in... But no one's there because it's the weekend.' " },
+                    { id: 4, text: "What can be inferred about the molecular biology professor?", options: ["The professor is disappointed...", "The professor is used to students' having to repeat experiments.", "The professor would be willing to help...", "The professor is likely to write a note..."], correct: [1], reason: "Answer: B. 原文Advisor说: 'normally, this kind of stuff happens in the lab all the time. And it's usually no big deal.' " },
+                    { id: 5, text: "Why does the adviser say this?", options: ["He expects the student to receive an excellent grade...", "He is asking the student to work faster.", "He realizes that the student's experiment...", "He feels assured that the student will fulfill her course requirements"], correct: [3], reason: "Answer: D. 确认学生会完成作业，他就能收到分数了。" }
+                ]
+            },
+            "L3": {
+                title: "Lecture 3: Acting Class",
+                questions: [
+                    { id: 1, text: "What is the purpose of the lecture?", options: ["To help the students prepare...", "To introduce students to the class they are taking", "To prepare the students for a play...", "To introduce students to a play..."], correct: [1], reason: "Answer: B. 开头提到 'this class is going to teach you the fundamentals...'" },
+                    { id: 2, text: "What is the connection between Stanislavski and method acting?", options: ["He adapted method acting...", "He was an early critic...", "He was the first person to teach...", "He established the basic principles of method acting"], correct: [3], reason: "Answer: D. 原文: 'Stanislavski developed a systematic approach... became the basis for us now known as method acting.' " },
+                    { id: 3, text: "Why does the professor mention an actor shaking his fist?", options: ["To give an example of an outdated acting technique", "To give an example of an acting exercise...", "To illustrate that great actors...", "To illustrate that gestures can help..."], correct: [0], reason: "Answer: A. 提到这是 'Before Stanislavski' 的做法，即过时的做法。" },
+                    { id: 4, text: "What is the fundamental principle underlying all varieties of method acting?", options: ["Actors must develop their own system...", "Actors must draw upon personal experience...", "Actors perform best when they do not consciously analyze...", "Actors perform best when playing a character whose life experiences..."], correct: [1], reason: "Answer: B. 原文: 'Actors have to tap into their own experiences and emotions' " },
+                    { id: 5, text: "What does the professor imply when he says this?", options: ["The student needs to think about what the writer intended", "The student needs to understand the character's circumstances.", "The student may be able to express a greater range of emotion...", "The student needs to speak with greater power..."], correct: [2], reason: "Answer: C. 教授鼓励学生挖掘内心的复杂情感。" },
+                    { id: 6, text: "What does the professor mean when he says 'people can read the lines at home'?", options: ["Students should read a play...", "Students should memorize their lines...", "Actors should understand the meaning...", "Actors should go beyond the literal meaning of the script."], correct: [3], reason: "Answer: D. 原文: 'They come to the theater to hear what's between the lines.' " }
+                ]
+            }
+        };
+
+        // 变量状态
+        let currentSection = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // { 0: [1], 1: [0,2] }
+        let timerInterval;
+        let seconds = 0;
+
+        // 获取 DOM 元素
+        const menuEl = document.getElementById('section-menu');
+        const quizEl = document.getElementById('quiz-interface');
+        const resultEl = document.getElementById('result-interface');
+        const timerEl = document.getElementById('timer');
+        
+        // 1. 开始考试逻辑
+        function startQuiz(sectionKey) {
+            currentSection = toeflData[sectionKey];
+            currentQuestionIndex = 0;
+            userAnswers = {};
+            seconds = 0;
+
+            // 切换界面
+            menuEl.classList.add('hidden');
+            resultEl.classList.add('hidden');
+            quizEl.classList.remove('hidden');
+
+            // 启动计时器
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+                const secs = (seconds % 60).toString().padStart(2, '0');
+                timerEl.textContent = `${mins}:${secs}`;
+            }, 1000);
+
+            renderQuestion();
+        }
+
+        // 2. 渲染题目
+        function renderQuestion() {
+            const q = currentSection.questions[currentQuestionIndex];
+            
+            // 更新标签
+            document.getElementById('question-tag').textContent = `Question ${currentQuestionIndex + 1} of ${currentSection.questions.length}`;
+            
+            // 更新题目文本
+            document.getElementById('question-text').innerHTML = q.text + (q.type === 'multi' ? ' <br><small style="color:var(--accent-orange)">(Select multiple answers)</small>' : '');
+
+            // 生成选项
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const label = document.createElement('label');
+                label.className = 'option-item';
+                
+                // 判断单选还是多选
+                const inputType = q.type === 'multi' ? 'checkbox' : 'radio';
+                
+                const input = document.createElement('input');
+                input.type = inputType;
+                input.name = 'current-question'; // 确保单选互斥
+                input.value = idx;
+                
+                // 如果用户之前选过（比如做了“上一题”功能，这里虽然没做back，但逻辑保留），回显
+                if (userAnswers[currentQuestionIndex] && userAnswers[currentQuestionIndex].includes(idx)) {
+                    input.checked = true;
+                }
+
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(opt));
+                optionsContainer.appendChild(label);
+            });
+        }
+
+        // 3. 下一题逻辑
+        function nextQuestion() {
+            // 获取用户选择
+            const inputs = document.querySelectorAll('input[name="current-question"]:checked');
+            if (inputs.length === 0) {
+                alert("Please select an answer.");
+                return;
+            }
+
+            // 保存答案
+            const selected = Array.from(inputs).map(i => parseInt(i.value));
+            userAnswers[currentQuestionIndex] = selected;
+
+            // 判断是否是最后一题
+            if (currentQuestionIndex < currentSection.questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // 4. 结束与结算逻辑
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            quizEl.classList.add('hidden');
+            resultEl.classList.remove('hidden');
+
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+            
+            let score = 0;
+            let total = currentSection.questions.length;
+
+            currentSection.questions.forEach((q, idx) => {
+                const userAns = userAnswers[idx] || [];
+                const correctAns = q.correct;
+                
+                // 简单的数组比较逻辑
+                // 排序后转换成字符串比较，例如 [0,3] vs [0,3]
+                const isCorrect = JSON.stringify(userAns.sort()) === JSON.stringify(correctAns.sort());
+                if (isCorrect) score++;
+
+                // 渲染结果条目
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                
+                const statusClass = isCorrect ? 'correct' : 'wrong';
+                const statusText = isCorrect ? 'CORRECT' : 'INCORRECT';
+
+                // 将索引转换为字母 (0->A, 1->B)
+                const toLetter = (i) => String.fromCharCode(65 + i);
+                
+                div.innerHTML = `
+                    <div><strong>Q${idx + 1}: ${q.text}</strong></div>
+                    <div class="${statusClass}" style="margin:5px 0;">${statusText}</div>
+                    <div>Your Answer: ${userAns.map(toLetter).join(', ')}</div>
+                    <div>Correct Answer: ${correctAns.map(toLetter).join(', ')}</div>
+                    <div class="explanation">
+                        <strong>Analysis:</strong> ${q.reason}
+                    </div>
+                `;
+                reviewList.appendChild(div);
+            });
+
+            document.getElementById('score-display').textContent = `Score: ${score} / ${total}`;
+        }
+    </script>
+</body>
+</html>
