@@ -1,0 +1,237 @@
+:root {
+    --bg-color: #f4f6f5; /* 干净的灰白背景 */
+    --card-bg: #ffffff;
+    --primary-green: #2d6a4f; /* 深绿色，高级感 */
+    --accent-orange: #e76f51; /* 橙色，用于强调 */
+    --text-main: #333;
+    --text-light: #666;
+    --border-radius: 12px;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-bottom: 80px; /* 为底部按钮留空间 */
+}
+
+/* 头部设计 */
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.tag {
+    background-color: var(--accent-orange);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+h1 {
+    font-size: 2.2rem;
+    margin-top: 10px;
+    color: var(--primary-green);
+    font-weight: 700;
+}
+
+/* 卡片通用样式 */
+.card, .question-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    border: 1px solid rgba(0,0,0,0.02);
+}
+
+/* 听力播放器样式 */
+.audio-wrapper {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+audio {
+    width: 100%;
+    outline: none;
+    height: 40px;
+}
+
+.transcript-toggle {
+    margin-top: 15px;
+    font-size: 14px;
+    color: var(--text-light);
+    cursor: pointer;
+}
+
+.transcript-content {
+    margin-top: 10px;
+    padding: 15px;
+    background-color: #fcfcfc;
+    border-left: 3px solid var(--primary-green);
+    font-size: 14px;
+}
+
+/* 问题区样式 */
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.q-num {
+    font-weight: bold;
+    color: var(--primary-green);
+}
+
+.q-type {
+    font-size: 12px;
+    color: #999;
+    background: #eee;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.replay-area {
+    background: #fff8f5; /* 淡淡的橙色背景 */
+    border: 1px dashed var(--accent-orange);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.replay-instruction {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    color: var(--accent-orange);
+    font-weight: bold;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+}
+
+/* 选项样式 */
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option:hover {
+    border-color: #b2d8c8; /* 浅绿色 */
+    background-color: #fafffc;
+}
+
+/* 隐藏原生 Radio */
+.option input[type="radio"] {
+    display: none;
+}
+
+/* 自定义选项圆圈 */
+.bubble {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #999;
+    flex-shrink: 0;
+}
+
+/* 选中状态 */
+.option input:checked + .bubble {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+.option input:checked ~ .text {
+    color: var(--primary-green);
+    font-weight: 500;
+}
+
+/* 结果反馈 */
+.feedback {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    display: none; /* 默认隐藏 */
+}
+
+.feedback.correct {
+    display: block;
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border-left: 4px solid #198754;
+}
+
+.feedback.wrong {
+    display: block;
+    background-color: #f8d7da;
+    color: #842029;
+    border-left: 4px solid #dc3545;
+}
+
+/* 底部按钮 */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: white;
+    padding: 15px;
+    text-align: center;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
+}
+
+#check-btn {
+    background-color: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(45, 106, 79, 0.3);
+    transition: transform 0.1s;
+}
+
+#check-btn:active {
+    transform: scale(0.98);
+}

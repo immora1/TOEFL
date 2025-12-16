@@ -3,568 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOEFL Listening Simulation</title>
-    <style>
-        :root {
-            --primary-green: #2E8B57; /* 森林绿 */
-            --accent-orange: #FF8C00; /* 活力橙 */
-            --error-red: #D32F2F;     /* 错误红 */
-            --bg-color: #F5F7F9;      /* 浅灰背景 */
-            --text-main: #333333;
-            --border-radius: 8px;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- 顶部导航 --- */
-        header {
-            background-color: #fff;
-            padding: 0 40px;
-            height: 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            z-index: 10;
-        }
-
-        h1 { margin: 0; font-size: 1.2rem; color: var(--primary-green); letter-spacing: 1px; font-weight: 700; }
-        #timer { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.3rem; color: #444; }
-
-        /* --- 主容器 --- */
-        main {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-            overflow: hidden;
-        }
-
-        .container {
-            background: white;
-            width: 100%;
-            max-width: 1100px;
-            border-radius: var(--border-radius);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            display: flex;
-            flex-direction: column;
-            height: 85vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* --- 1. 首页选题 --- */
-        .menu-view { padding: 40px; overflow-y: auto; align-items: center; justify-content: center; }
-        .grid-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 20px; width: 100%; max-width: 800px; }
-        .menu-btn {
-            background: white; border: 2px solid var(--primary-green); color: var(--primary-green);
-            padding: 20px; font-size: 1.1rem; cursor: pointer; border-radius: var(--border-radius);
-            font-weight: 600; transition: all 0.2s ease;
-        }
-        .menu-btn:hover { background: var(--primary-green); color: white; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(46,139,87,0.3); }
-
-        /* --- 2. 做题界面 --- */
-        .quiz-view { padding: 40px; overflow-y: auto; }
-
-        /* 播放器容器 */
-        .audio-section {
-            background: #f1f8f4;
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            border-left: 5px solid var(--primary-green);
-        }
-
-        /* 重听题高亮容器 */
-        .replay-box {
-            background: #fffbf0;
-            padding: 15px 20px;
-            border-radius: var(--border-radius);
-            margin-bottom: 25px;
-            border: 2px solid var(--accent-orange);
-            animation: slideIn 0.4s ease-out;
-        }
-
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-
-        audio { width: 100%; height: 40px; margin-top: 8px; outline: none; }
-
-        .question-tag { color: #888; margin-bottom: 10px; font-size: 0.9rem; font-weight: 500; }
-        .question-text { font-size: 1.25rem; margin-bottom: 25px; line-height: 1.6; font-weight: 500; }
-
-        .options-list { display: flex; flex-direction: column; gap: 12px; }
-        .option-item {
-            display: flex; align-items: flex-start; padding: 15px;
-            border: 1px solid #e0e0e0; border-radius: 8px; cursor: pointer;
-            transition: background 0.2s, border 0.2s;
-        }
-        .option-item:hover { background-color: #f4fcf7; border-color: var(--primary-green); }
-        .option-item input { margin-right: 15px; margin-top: 4px; accent-color: var(--primary-green); transform: scale(1.2); }
-
-        .controls { margin-top: 30px; display: flex; justify-content: flex-end; }
-        .btn-primary {
-            background-color: var(--accent-orange); color: white; border: none;
-            padding: 12px 35px; font-size: 1rem; border-radius: 6px; cursor: pointer; font-weight: bold;
-            transition: opacity 0.2s;
-        }
-        .btn-primary:hover { opacity: 0.9; }
-
-        /* --- 3. 复习界面 (Split Layout) --- */
-        .review-layout { display: flex; height: 100%; width: 100%; }
-        
-        .review-left { 
-            flex: 6; 
-            padding: 30px; 
-            overflow-y: auto; 
-            border-right: 1px solid #eee;
-            background: #fff;
-        }
-        
-        .review-right { 
-            flex: 4; 
-            display: flex; 
-            flex-direction: column; 
-            background-color: #f9f9f9; 
-        }
-
-        /* 题号导航 */
-        .question-nav-bar { display: flex; gap: 8px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; }
-        .nav-item {
-            width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
-            font-weight: bold; cursor: pointer; border: 1px solid #e0e0e0; background: white; color: #666;
-            transition: all 0.2s;
-        }
-        .nav-item:hover { border-color: #ccc; }
-        .nav-item.active { border: 2px solid #333; transform: scale(1.1); z-index: 2; }
-        
-        /* 状态颜色 */
-        .nav-item.is-correct { background-color: #e8f5e9; color: var(--primary-green); border-color: #c8e6c9; }
-        .nav-item.is-wrong { background-color: #ffebee; color: var(--error-red); border-color: #ffcdd2; }
-        .nav-item.active.is-correct { background-color: var(--primary-green); color: white; border-color: var(--primary-green); }
-        .nav-item.active.is-wrong { background-color: var(--error-red); color: white; border-color: var(--error-red); }
-
-        /* 复习区内容 */
-        .answer-comparison { 
-            margin-top: 25px; padding: 20px; background: #f8f9fa; border-radius: 8px; 
-            font-family: 'Courier New', monospace; font-size: 0.95rem; 
-        }
-        .ans-label { color: #666; margin-right: 15px; }
-        .ans-correct { color: var(--primary-green); font-weight: bold; }
-        .ans-wrong { color: var(--error-red); font-weight: bold; text-decoration: line-through; margin-right: 10px; }
-
-        .explanation-box { margin-top: 20px; }
-        .exp-title { display: inline-block; border-bottom: 2px solid #a0cfa0; color: #333; font-weight: bold; margin-bottom: 10px; padding-bottom: 2px; }
-        .exp-text { line-height: 1.6; color: #555; font-size: 0.95rem; }
-
-        /* 右侧原文区 */
-        .transcript-header { 
-            padding: 15px 20px; background: #fff; border-bottom: 1px solid #eee; 
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .toggle-btn { 
-            background: #4a90e2; color: white; border: none; padding: 6px 16px; 
-            border-radius: 20px; font-size: 0.85rem; cursor: pointer; 
-        }
-        .transcript-content { 
-            padding: 25px; overflow-y: auto; flex: 1; line-height: 1.8; 
-            color: #444; white-space: pre-wrap; font-size: 0.95rem;
-        }
-        
-        .hidden { display: none !important; }
-
-    </style>
+    <title>TOEFL L3 听力练习 | Method Acting</title>
+    <link rel="stylesheet" href="quiz_styles.css">
 </head>
 <body>
+    <div class="container">
+        <header>
+            <span class="tag">TOEFL LISTENING</span>
+            <h1>L3: Acting Class</h1>
+        </header>
 
-    <header>
-        <h1>TOEFL LISTENING PRACTICE</h1>
-        <div id="timer">00:00</div>
-    </header>
+        <main>
+            <section class="card listening-section">
+                <div class="card-header">
+                    <h2>🎧 主听力材料</h2>
+                    <span class="duration">Lecture</span>
+                </div>
+                <div class="audio-wrapper">
+                    <p class="instruction">请先听完完整的讲座内容，再回答下方问题。</p>
+                    <audio controls class="main-audio">
+                        <source src="audio/L3.mp3" type="audio/mpeg">
+                        您的浏览器不支持音频播放。
+                    </audio>
+                </div>
+                
+                <details class="transcript-toggle">
+                    <summary>查看听力原文 (Transcript)</summary>
+                    <div class="transcript-content">
+                        <p><strong>Professor:</strong> ...But before we get into any techniques and exercises, what you're going to be learning in here this semester is what's known as method acting...</p>
+                        <p><strong>Professor:</strong> Well, no, you can't be Donna Smith from Kansas City, Missouri. But you can draw on certain parts of your personality, certain parts of your experience and emotional life. The key is, you have to find parts of you, your life that are analogous to those of your character, to your character's life.</p>
+                        <p><strong>Donna:</strong> Okay, but let's say I'm playing a character who's like, really brave, like she's not afraid of anybody.</p>
+                        <p><strong>Professor:</strong> Well, I'd be willing to bet that if you thought about it, you could think of a set of circumstances where you'd stand up and confront someone who is much more powerful than you. For example, suppose you had to do that to protect your family.</p>
+                    </div>
+                </details>
+            </section>
 
-    <main>
-        <div id="section-menu" class="container menu-view">
-            <h2 style="text-align:center; color:#333; margin-bottom:30px;">Select Passage</h2>
-            <div class="grid-menu">
-                <button class="menu-btn" onclick="startQuiz('C1')">C1 (Conversation)</button>
-                <button class="menu-btn" onclick="startQuiz('L1')">L1 (Art History)</button>
-                <button class="menu-btn" onclick="startQuiz('L2')">L2 (Paleontology)</button>
-                <button class="menu-btn" onclick="startQuiz('C2')">C2 (Bio Lab)</button>
-                <button class="menu-btn" onclick="startQuiz('L3')">L3 (Acting)</button>
-            </div>
-            <p style="margin-top:40px; color:#999; text-align:center; font-size:0.85rem;">
-                Design & Logic Simulation<br>Ensure 'audio' folder is present.
-            </p>
-        </div>
+            <section class="questions-section">
+                <h2>📝 练习与重听 (Replay Questions)</h2>
 
-        <div id="quiz-interface" class="container quiz-view hidden">
-            <div class="audio-section">
-                <div style="font-weight:bold; color:var(--primary-green); margin-bottom:5px;">Listening Passage</div>
-                <audio id="main-audio-player" controls controlsList="nodownload"></audio>
-            </div>
-
-            <div id="replay-container" class="replay-box hidden">
-                <div style="font-weight:bold; color:var(--accent-orange); margin-bottom:5px;">🎧 Listen again to part of the lecture:</div>
-                <audio id="replay-audio-player" controls controlsList="nodownload"></audio>
-            </div>
-
-            <div class="question-tag" id="q-progress">Question 1 of 5</div>
-            <div class="question-text" id="q-text">Loading...</div>
-            <div class="options-list" id="options-container"></div>
-            
-            <div class="controls">
-                <button class="btn-primary" onclick="nextQuestion()">Next Question</button>
-            </div>
-        </div>
-
-        <div id="result-interface" class="container hidden" style="padding:0;">
-            <div class="review-layout">
-                <div class="review-left">
-                    <div id="nav-bar" class="question-nav-bar"></div>
+                <div class="question-card" data-id="q5" data-answer="D">
+                    <div class="question-header">
+                        <span class="q-num">Question 5 of 6</span>
+                        <span class="q-type">Replay Question</span>
+                    </div>
                     
-                    <div id="review-content">
-                        <div class="question-text" id="r-q-text" style="font-size:1.1rem;"></div>
-                        <div class="options-list" id="r-options"></div>
-                        
-                        <div class="answer-comparison">
-                            <div><span class="ans-label">My Answer:</span> <span id="r-my-ans"></span></div>
-                            <div style="margin-top:5px;"><span class="ans-label">Correct:</span> <span id="r-correct-ans" class="ans-correct"></span></div>
-                        </div>
-
-                        <div class="explanation-box">
-                            <div class="exp-title">Analysis</div>
-                            <div class="exp-text" id="r-explanation"></div>
-                        </div>
+                    <div class="replay-area">
+                        <p class="replay-instruction">🔊 请听下方录音片段，回答问题：</p>
+                        <audio controls>
+                            <source src="audio/L3_replay_q5.mp3" type="audio/mpeg">
+                        </audio>
                     </div>
 
-                    <button class="btn-primary" style="background:#666; margin-top:40px;" onclick="location.reload()">Back to Menu</button>
+                    <p class="question-text"><strong>What does the professor mean when he says this?</strong></p>
+                    
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q5" value="A">
+                            <span class="bubble">A</span>
+                            <span class="text">Students should read a play before seeing it performed.</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q5" value="B">
+                            <span class="bubble">B</span>
+                            <span class="text">Students should memorize their lines before coming to class.</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q5" value="C">
+                            <span class="bubble">C</span>
+                            <span class="text">Actors should understand the meaning of their lines before memorizing them.</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q5" value="D">
+                            <span class="bubble">D</span>
+                            <span class="text">Actors should go beyond the literal meaning of the script.</span>
+                        </label>
+                    </div>
+                    <div class="feedback"></div>
                 </div>
 
-                <div class="review-right">
-                    <div class="transcript-header">
-                        <span style="font-weight:bold; color:#555;">Transcript</span>
-                        <button class="toggle-btn" onclick="toggleTranscript()">Hide</button>
+                <div class="question-card" data-id="q6" data-answer="C">
+                    <div class="question-header">
+                        <span class="q-num">Question 6 of 6</span>
+                        <span class="q-type">Replay Question</span>
                     </div>
-                    <div style="padding:0 25px; background:white; border-bottom:1px solid #eee;">
-                         <audio id="review-main-audio" controls style="width:100%; margin:10px 0;"></audio>
+
+                    <div class="replay-area">
+                        <p class="replay-instruction">🔊 请听下方录音片段，回答问题：</p>
+                        <audio controls>
+                            <source src="audio/L3_replay_q6.mp3" type="audio/mpeg">
+                        </audio>
                     </div>
-                    <div id="transcript-box" class="transcript-content"></div>
+
+                    <p class="question-text"><strong>What does the professor imply when he says this?</strong></p>
+
+                    <div class="options">
+                        <label class="option">
+                            <input type="radio" name="q6" value="A">
+                            <span class="bubble">A</span>
+                            <span class="text">The student needs to think about what the writer intended.</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="B">
+                            <span class="bubble">B</span>
+                            <span class="text">The student needs to understand the character's circumstances.</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="C">
+                            <span class="bubble">C</span>
+                            <span class="text">The student may be able to express a greater range of emotion than she realizes.</span>
+                        </label>
+                        <label class="option">
+                            <input type="radio" name="q6" value="D">
+                            <span class="bubble">D</span>
+                            <span class="text">The student needs to speak with greater power when playing a brave character.</span>
+                        </label>
+                    </div>
+                    <div class="feedback"></div>
                 </div>
-            </div>
-        </div>
-    </main>
 
-    <script>
-        // --- 核心数据配置 ---
-        // 注意：L3 配置了双重听文件
-        const toeflData = {
-            "C1": {
-                audioSrc: "audio/C1.mp3", 
-                transcript: `Student: Donna Blake?\nDirector: Yes. Michael Jones?\nStudent: Great to see you. I'm so glad you're interested in helping our adult literacy program at the community center. We really need someone like you to promote our services.\nDirector: I don't know anything about that. The reason I asked you to come in today was to discuss the community achievement award you won for your volunteer work.\nStudent: That's what this is about. It's all connected anyhow.\nDirector: I'm sorry?\nStudent: The achievement award. I won it cause of all the volunteer hours I've put into the adult literacy program. I started it actually really.\nDirector: Really? Could you tell me more? It's for a news release. Whenever any of our students are faculty wins a national honor, it reflects well on our university. So I write a news release and send it to the media. This way, there's a good chance the city newspaper will pick up the story.\nStudent: Wow, cool. I've been quoted in the student newspaper, but the city paper that's different. It'll bring so much publicity to our program.\nDirector: You've earned your moment in the spotlight. In fact, you represent one of the best things about our school -- caring people. So let's get started. You said you founded the literacy program when?\nStudent: 3 years ago. I volunteered for an after school program at the local community center. It was fun. We were helping kids learn to read. Then one kid's Mom told me she also had trouble reading, so I thought maybe I could expand the program to teach literacy skills to adults, too. The director of the community center, he loved the idea. So now any adult can come in if they want to become better readers.\nDirector: So how'd you get chosen for the achievement award? Did you apply for it?\nStudent: No, the director nominated me. You can't nominate yourself, but the director submitted my name and all this Information about my volunteer work to the award committee.\nDirector: But you knew beforehand that you were nominated.\nStudent: No, I had no idea. Basically, I was shocked when I won. There were only like ten winners out of several hundred college students from around the country who were nominated.\nDirector: Very impressive. So how many people has your program served?\nStudent: We've tutored several hundred people so far.\nDirector: We?\nStudent: Yeah, I recruited like 12 volunteer tutors, friends, professor, I even got my family involved.\nDirector: Any plans for the prize money that comes with your award? Take a vacation, maybe?\nStudent: No, I'll use it for supplies for the literacy program, like workbooks and writing materials. Maybe now we can hire somebody to promote our program. We'd really like to bring in some more volunteers, so we can help more adult students.\nDirector: I think I've got enough for the release now. Listening to you...Maybe I can do some publicity for your center. I'll try to stop by soon to see if I can help.`,
-                questions: [
-                    { id: 1, text: "Why does the woman wish to speak to the student?", options: ["To notify him about an award that he will be receiving", "To offer assistance with a program he runs", "To ask him to start a literacy program at the university", "To learn more about his accomplishments as a volunteer"], correct: [3], reason: "原文: 'The reason I asked you to come in today was to discuss the community achievement award... Could you tell me more?'" },
-                    { id: 2, text: "How does the student feel about the possibility of being mentioned in the city newspaper?", options: ["He is proud that he would be able to promote his university to the public at large", "He is excited that his literacy program would receive some publicity", "He is confused because he does not think readers...", "He is uncomfortable because he is one of several volunteers..."], correct: [1], reason: "原文: 'Wow, cool... It'll bring so much publicity to our program.'" },
-                    { id: 3, text: "How did the award committee become aware of the student?", options: ["The student submitted a description...", "The director of the community center recommended him for an award.", "The committee received a news release...", "The student asked a committee member..."], correct: [1], reason: "原文: 'No, the director nominated me.'" },
-                    { id: 4, text: "What can be inferred about the student? (Click on 3 answers)", type: "multi", options: ["He works full time at the community center.", "He enjoys helping other people", "He is easily discouraged.", "He is persuasive.", "He is resourceful."], correct: [1, 3, 4], reason: "推断依据: 他做志愿者(B); 说服他人参与(D); 利用奖金买物资(E)。" },
-                    { 
-                        id: 5, 
-                        text: "Why does the woman say this?", 
-                        hasReplay: true,
-                        replaySrc: "audio/C1_replay.mp3",
-                        options: ["To apologize for not telling him the purpose...", "To apologize for underestimating the extent...", "To ask him to clarify the meaning...", "To indicate that she disagrees..."], 
-                        correct: [2], 
-                        reason: "重听题: 老师说 'I think I've got enough...' 是为了结束之前的话题或要求澄清(Context specific)。" 
-                    }
-                ]
-            },
-            "L1": {
-                audioSrc: "audio/L1.mp3",
-                transcript: `(Transcript... omitted for space, functionality is key)`,
-                questions: [
-                    { id: 1, text: "What does the professor mainly discuss? (Click on 2 answers)", type: "multi", options: ["A powerful and unusual ruler of Egypt", "Military actions during the New Kingdom...", "How Hatshepsut's statue differs from those of other pharaohs", "What the features of a pharaoh's statue represent"], correct: [0, 3], reason: "主旨题: AD" },
-                    { id: 2, text: "What does the professor imply about the 'material culture' of ancient societies?", options: ["It is considered more reliable...", "It is the only source of information about certain societies.", "Most of it was created by unskilled workers.", "Its artistic value is greater..."], correct: [1], reason: "细节题: B" },
-                    { id: 3, text: "What important distinction does the professor make between Hatshepsut and previous queens?", options: ["She was the first queen to reign with the king", "She was the first queen to rule as regent-protector...", "She was the first queen to declare herself pharaoh.", "She was the first queen whose image appeared..."], correct: [2], reason: "细节题: C" },
-                    { id: 4, text: "What does the professor imply about the image of Hatshepsut wearing the nemes?", options: ["She wore the nemes to indicate her devotion...", "She wore the nemes as a symbol of her royal power.", "She wore the nemes to indicate that she was female.", "She wore the nemes in public only rarely"], correct: [1], reason: "细节题: B" },
-                    { id: 5, text: "According to the professor, what does Hatshepsut's hand gesture in the statue represent?", options: ["Hatshepsut's military strength", "Hatshepsut's absolute political authority", "Hatshepsut's spiritual role", "Hatshepsut's tolerance of different religions"], correct: [2], reason: "细节题: C" },
-                    { 
-                        id: 6, 
-                        text: "Why does the professor say this?", 
-                        hasReplay: true,
-                        replaySrc: "audio/L1_replay.mp3",
-                        options: ["To apologize for a mistake she just made", "To briefly clarify a statement she made...", "To ask if the students have questions...", "To introduce a topic that is not related..."], 
-                        correct: [3], 
-                        reason: "重听题: D" 
-                    }
-                ]
-            },
-            "L2": {
-                audioSrc: "audio/L2.mp3",
-                transcript: `(Transcript... omitted for space)`,
-                questions: [
-                    { id: 1, text: "What is the main purpose of the lecture?", options: ["To determine the age of the planet Earth", "To debate opposing theories of how life originated", "To consider ways to determine when life on Earth began", "To explain the process that formed the fossils"], correct: [2], reason: "主旨题: C" },
-                    { id: 2, text: "What is the professor's attitude toward the claim that life first appeared 3.5 billion years ago?", options: ["She is confident...", "She believes it is likely that living organisms existed long before that time", "She is concerned...", "She doubts that fossilized rocks..."], correct: [1], reason: "态度题: B" },
-                    { id: 3, text: "Why does the professor mention the violent processes that Earth underwent?", options: ["To explain how Earth acquired...", "To provide an alternative explanation...", "To show why it took so long...", "To explain why it is unlikely that the earliest fossil specimens have survived"], correct: [3], reason: "细节题: D" },
-                    { id: 4, text: "Why does the professor think paleontologists should study the Moon?", options: ["Its condition is similar...", "It may contain Earth's most ancient surviving rocks.", "It is not affected...", "It may provide clues..."], correct: [1], reason: "细节题: B" },
-                    { id: 5, text: "If it is proven that life appeared soon after Earth was formed, what further conclusion might this support?", options: ["The universe is likely to contain many other Earth-like planets", "Living organisms are capable of surviving extreme conditions.", "Life probably exists in other parts of the universe", "Oceans may have covered Earth earlier..."], correct: [2], reason: "推断题: C" },
-                    { 
-                        id: 6, 
-                        text: "What does the professor imply when she says this?", 
-                        hasReplay: true,
-                        replaySrc: "audio/L2_replay.mp3",
-                        options: ["Liquid water is the primary necessity...", "Earth's temperature is not relevant...", "Liquid water could have formed on other planets...", "The student should consider a variety of conditions..."], 
-                        correct: [0], 
-                        reason: "重听题: A" 
-                    }
-                ]
-            },
-            "C2": {
-                audioSrc: "audio/C2.mp3",
-                transcript: `(Transcript... omitted for space)`,
-                questions: [
-                    { id: 1, text: "What does the student try to explain to her adviser?", options: ["Why her experiment produced unexpected results", "Why she did not finish her experiment on time", "What properties of the RP73 protein...", "Why she needs to have her grade changed"], correct: [1], reason: "主旨题: B" },
-                    { id: 2, text: "Why does the student want to study the RP73 protein?", options: ["Because it has an unusually rapid rate...", "Because it was only recently discovered", "Because it may have medical applications", "Because it may play a role..."], correct: [2], reason: "细节题: C" },
-                    { id: 3, text: "Under what circumstance might her experiment have been saved?", options: ["If the lab incubator...", "If the experiment had not stayed in the freezer...", "If she had better understood...", "If someone had been in the laboratory when she telephoned"], correct: [3], reason: "细节题: D" },
-                    { id: 4, text: "From the student's comments, what can be inferred about the molecular biology professor?", options: ["The professor is disappointed...", "The professor is used to students' having to repeat experiments.", "The professor would be willing to help...", "The professor is likely to write a note..."], correct: [1], reason: "推断题: B" },
-                    { 
-                        id: 5, 
-                        text: "Why does the adviser say this?", 
-                        hasReplay: true,
-                        replaySrc: "audio/C2_replay.mp3",
-                        options: ["He expects the student to receive an excellent grade", "He is asking the student to work faster.", "He realizes that the student's experiment...", "He feels assured that the student will fulfill her course requirements"], 
-                        correct: [3], 
-                        reason: "重听题: D" 
-                    }
-                ]
-            },
-            "L3": {
-                audioSrc: "audio/L3.mp3",
-                transcript: `(Transcript... omitted for space)`,
-                questions: [
-                    { id: 1, text: "What is the purpose of the lecture?", options: ["To help the students prepare...", "To introduce students to the class they are taking", "To prepare the students for a play...", "To introduce students to a play..."], correct: [1], reason: "主旨题: B" },
-                    { id: 2, text: "What is the connection between Stanislavski and method acting?", options: ["He adapted method acting...", "He was an early critic...", "He was the first person to teach...", "He established the basic principles of method acting"], correct: [3], reason: "细节题: D" },
-                    { id: 3, text: "Why does the professor mention an actor shaking his fist?", options: ["To give an example of an outdated acting technique", "To give an example of an acting exercise...", "To illustrate that great actors...", "To illustrate that gestures can help..."], correct: [0], reason: "细节题: A" },
-                    { id: 4, text: "What is the fundamental principle underlying all varieties of method acting?", options: ["Actors must develop their own system...", "Actors must draw upon personal experience...", "Actors perform best when they do not consciously analyze...", "Actors perform best when playing a character whose life experiences..."], correct: [1], reason: "细节题: B" },
-                    
-                    // --- Q5 配置为重听 ---
-                    { 
-                        id: 5, 
-                        text: "What does the professor imply when he says this?", 
-                        hasReplay: true,
-                        replaySrc: "audio/L3_replay_q5.mp3", 
-                        options: ["The student needs to think about what the writer intended", "The student needs to understand the character's circumstances.", "The student may be able to express a greater range of emotion...", "The student needs to speak with greater power..."], 
-                        correct: [2], 
-                        reason: "重听题 Q5: C" 
-                    },
-                    
-                    // --- Q6 也是重听 ---
-                    { 
-                        id: 6, 
-                        text: "What does the professor mean when he says this?", 
-                        hasReplay: true,
-                        replaySrc: "audio/L3_replay_q6.mp3",
-                        options: ["Students should read a play before seeing it performed.", "Students should memorize their lines before coming to class", "Actors should understand the meaning of their lines before memorizing", "Actors should go beyond the literal meaning of the script."], 
-                        correct: [3], 
-                        reason: "重听题 Q6: D" 
-                    }
-                ]
-            }
-        };
+            </section>
+        </main>
 
-        // --- 逻辑控制区 ---
-        let currentData = null;
-        let qIndex = 0;
-        let userAns = {};
-        let timerInt;
-        let secs = 0;
-        let reviewIdx = 0;
+        <footer>
+            <button id="check-btn">Check Answers</button>
+        </footer>
+    </div>
 
-        // 元素引用
-        const menuEl = document.getElementById('section-menu');
-        const quizEl = document.getElementById('quiz-interface');
-        const resultEl = document.getElementById('result-interface');
-        const timerEl = document.getElementById('timer');
-        const mainAudio = document.getElementById('main-audio-player');
-        const replayAudio = document.getElementById('replay-audio-player');
-        const replayContainer = document.getElementById('replay-container');
-
-        // 1. 开始练习
-        function startQuiz(key) {
-            currentData = toeflData[key];
-            qIndex = 0;
-            userAns = {};
-            secs = 0;
-
-            // 加载主音频
-            mainAudio.src = currentData.audioSrc;
-            mainAudio.load();
-            
-            // 切换界面
-            menuEl.classList.add('hidden');
-            resultEl.classList.add('hidden');
-            quizEl.classList.remove('hidden');
-
-            // 计时器
-            clearInterval(timerInt);
-            timerInt = setInterval(() => {
-                secs++;
-                const m = Math.floor(secs / 60).toString().padStart(2, '0');
-                const s = (secs % 60).toString().padStart(2, '0');
-                timerEl.textContent = `${m}:${s}`;
-            }, 1000);
-
-            renderQuestion();
-        }
-
-        // 2. 渲染题目
-        function renderQuestion() {
-            const q = currentData.questions[qIndex];
-            
-            document.getElementById('q-progress').textContent = `Question ${qIndex + 1} of ${currentData.questions.length}`;
-            document.getElementById('q-text').innerHTML = q.text + (q.type === 'multi' ? ' <small style="color:var(--accent-orange)">(Select multiple)</small>' : '');
-
-            // 检查是否重听
-            if (q.hasReplay && q.replaySrc) {
-                replayContainer.classList.remove('hidden');
-                replayAudio.src = q.replaySrc;
-                replayAudio.load();
-                // 暂停主音频
-                mainAudio.pause();
-            } else {
-                replayContainer.classList.add('hidden');
-                replayAudio.pause();
-            }
-
-            // 生成选项
-            const container = document.getElementById('options-container');
-            container.innerHTML = '';
-
-            q.options.forEach((opt, idx) => {
-                const label = document.createElement('label');
-                label.className = 'option-item';
-                
-                const input = document.createElement('input');
-                input.type = q.type === 'multi' ? 'checkbox' : 'radio';
-                input.name = 'q-input';
-                input.value = idx;
-                
-                // 回显
-                if (userAns[qIndex] && userAns[qIndex].includes(idx)) {
-                    input.checked = true;
-                }
-
-                label.appendChild(input);
-                label.appendChild(document.createTextNode(opt));
-                container.appendChild(label);
-            });
-        }
-
-        // 3. 下一题
-        function nextQuestion() {
-            const inputs = document.querySelectorAll('input[name="q-input"]:checked');
-            if (inputs.length === 0) {
-                alert("Please select an answer.");
-                return;
-            }
-
-            // 保存答案
-            userAns[qIndex] = Array.from(inputs).map(i => parseInt(i.value));
-            
-            // 跳转
-            if (qIndex < currentData.questions.length - 1) {
-                qIndex++;
-                renderQuestion();
-            } else {
-                finishQuiz();
-            }
-        }
-
-        // 4. 结束练习
-        function finishQuiz() {
-            clearInterval(timerInt);
-            mainAudio.pause();
-            replayAudio.pause();
-
-            quizEl.classList.add('hidden');
-            resultEl.classList.remove('hidden');
-
-            // 准备复习数据
-            document.getElementById('transcript-box').textContent = currentData.transcript || "No transcript available.";
-            document.getElementById('review-main-audio').src = currentData.audioSrc;
-
-            reviewIdx = 0;
-            renderReview();
-        }
-
-        // 5. 渲染复习界面
-        function renderReview() {
-            // A. 导航条
-            const nav = document.getElementById('nav-bar');
-            nav.innerHTML = '';
-            
-            currentData.questions.forEach((q, idx) => {
-                const btn = document.createElement('div');
-                btn.className = 'nav-item';
-                btn.textContent = idx + 1;
-                
-                // 判分逻辑 (排序对比)
-                const u = userAns[idx] || [];
-                const correct = JSON.stringify(u.sort()) === JSON.stringify(q.correct.sort());
-
-                btn.classList.add(correct ? 'is-correct' : 'is-wrong');
-                if (idx === reviewIdx) btn.classList.add('active');
-
-                btn.onclick = () => {
-                    reviewIdx = idx;
-                    renderReview();
-                };
-                nav.appendChild(btn);
-            });
-
-            // B. 内容展示
-            const q = currentData.questions[reviewIdx];
-            const u = userAns[reviewIdx] || [];
-            const toLet = i => String.fromCharCode(65 + i);
-
-            document.getElementById('r-q-text').textContent = `${reviewIdx + 1}. ${q.text}`;
-            
-            // 选项
-            const optDiv = document.getElementById('r-options');
-            optDiv.innerHTML = '';
-            q.options.forEach((opt, idx) => {
-                const row = document.createElement('div');
-                row.className = 'option-item';
-                row.style.cursor = 'default';
-                row.innerHTML = `<b style="margin-right:8px;">${toLet(idx)}.</b> ${opt}`;
-                optDiv.appendChild(row);
-            });
-
-            // 结果
-            const isCorrect = JSON.stringify(u.sort()) === JSON.stringify(q.correct.sort());
-            
-            const myAnsSpan = document.getElementById('r-my-ans');
-            myAnsSpan.textContent = u.length ? u.map(toLet).join(', ') : 'None';
-            myAnsSpan.className = isCorrect ? 'ans-correct' : 'ans-wrong';
-            
-            document.getElementById('r-correct-ans').textContent = q.correct.map(toLet).join(', ');
-            document.getElementById('r-explanation').textContent = q.reason;
-        }
-
-        // 6. 原文开关
-        function toggleTranscript() {
-            const box = document.getElementById('transcript-box');
-            const btn = document.querySelector('.toggle-btn');
-            box.classList.toggle('hidden');
-            btn.textContent = box.classList.contains('hidden') ? 'Show' : 'Hide';
-        }
-
-    </script>
+    <script src="quiz_script.js"></script>
 </body>
 </html>
