@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOEFL Listening TPO74</title>
+    <title>TOEFL Listening TPO75</title>
     <link rel="stylesheet" href="quiz_styles.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
     <div class="container">
         <header>
             <span class="tag">TOEFL LISTENING</span>
-            <h1 id="page-title">TPO 74 Practice</h1>
+            <h1 id="page-title">TPO 75 Practice</h1>
         </header>
 
         <main>
@@ -23,28 +23,28 @@
                 <div class="menu-grid">
                     <button class="menu-card" onclick="startQuiz('c1')">
                         <span class="icon">🗣️</span>
-                        <h3>C1: Fire Inspection</h3>
+                        <h3>C1: Adult Literacy</h3>
                         <p>Conversation</p>
                     </button>
                     <button class="menu-card" onclick="startQuiz('l1')">
-                        <span class="icon">🐦</span>
-                        <h3>L1: Bowerbirds</h3>
-                        <p>Biology Lecture</p>
+                        <span class="icon">🏛️</span>
+                        <h3>L1: Hatshepsut</h3>
+                        <p>Ancient History</p>
                     </button>
                     <button class="menu-card" onclick="startQuiz('l2')">
-                        <span class="icon">🌊</span>
-                        <h3>L2: Renewable Energy</h3>
-                        <p>Environmental Eng.</p>
+                        <span class="icon">🌑</span>
+                        <h3>L2: Origin of Life</h3>
+                        <p>Paleontology</p>
                     </button>
                     <button class="menu-card" onclick="startQuiz('c2')">
-                        <span class="icon">📝</span>
-                        <h3>C2: Essay Contest</h3>
+                        <span class="icon">🧬</span>
+                        <h3>C2: RP73 Experiment</h3>
                         <p>Conversation</p>
                     </button>
                     <button class="menu-card" onclick="startQuiz('l3')">
-                        <span class="icon">🗿</span>
-                        <h3>L3: Olmec Art</h3>
-                        <p>Art History Lecture</p>
+                        <span class="icon">🎭</span>
+                        <h3>L3: Method Acting</h3>
+                        <p>Acting Class</p>
                     </button>
                 </div>
             </section>
@@ -85,21 +85,34 @@
 
             <section id="result-view" class="card" style="display: none;">
                 <h2>🎉 完成测试 (Completed)</h2>
-                
                 <div class="score-box">
                     <div class="score-label">您的得分</div>
                     <div class="score-display">
                         <span id="final-score">0</span> / <span id="total-questions">0</span>
                     </div>
                 </div>
-
-                <div id="review-container"></div>
-
                 <div class="action-area">
-                    <button onclick="backToMenu()" class="secondary-btn">返回菜单 (Menu)</button>
-                    <button onclick="restartCurrentQuiz()" class="primary-btn" style="margin-top:10px;">重做本篇 (Retry)</button>
+                    <button onclick="enterReviewMode()" class="primary-btn">查看解析与原文 (Review & Transcript)</button>
+                    <button onclick="backToMenu()" class="secondary-btn" style="margin-top:10px;">返回菜单 (Menu)</button>
                 </div>
             </section>
+
+            <section id="review-view" class="card review-layout" style="display: none;">
+                <div class="review-nav-bar">
+                    <div id="question-navigator" class="nav-numbers"></div>
+                    <button onclick="backToMenu()" class="small-btn">退出复习</button>
+                </div>
+
+                <div class="split-container">
+                    <div class="left-panel">
+                        <div id="review-q-content"></div>
+                        <div class="answer-comparison" id="review-answer-bar"></div>
+                    </div>
+
+                    <div class="right-panel"></div>
+                </div>
+            </section>
+
         </main>
     </div>
 
