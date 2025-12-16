@@ -3,130 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOEFL L3 听力练习 | Method Acting</title>
+    <title>TOEFL Listening TPO74</title>
     <link rel="stylesheet" href="quiz_styles.css">
 </head>
 <body>
+    
+    <div id="timer" style="display:none;">Time: 00:00</div>
+
     <div class="container">
         <header>
             <span class="tag">TOEFL LISTENING</span>
-            <h1>L3: Acting Class</h1>
+            <h1 id="page-title">TPO 74 Practice</h1>
         </header>
 
         <main>
-            <section class="card listening-section">
+            <section id="menu-view" class="card">
+                <h2>📚 Select a Passage</h2>
+                <p class="instruction">请选择一个篇章开始练习：</p>
+                <div class="menu-grid">
+                    <button class="menu-card" onclick="startQuiz('c1')">
+                        <span class="icon">🗣️</span>
+                        <h3>C1: Fire Inspection</h3>
+                        <p>Conversation</p>
+                    </button>
+                    <button class="menu-card" onclick="startQuiz('l1')">
+                        <span class="icon">🐦</span>
+                        <h3>L1: Bowerbirds</h3>
+                        <p>Biology Lecture</p>
+                    </button>
+                    <button class="menu-card" onclick="startQuiz('l2')">
+                        <span class="icon">🌊</span>
+                        <h3>L2: Renewable Energy</h3>
+                        <p>Environmental Eng.</p>
+                    </button>
+                    <button class="menu-card" onclick="startQuiz('c2')">
+                        <span class="icon">📝</span>
+                        <h3>C2: Essay Contest</h3>
+                        <p>Conversation</p>
+                    </button>
+                    <button class="menu-card" onclick="startQuiz('l3')">
+                        <span class="icon">🗿</span>
+                        <h3>L3: Olmec Art</h3>
+                        <p>Art History Lecture</p>
+                    </button>
+                </div>
+            </section>
+
+            <section id="lecture-view" class="card" style="display: none;">
                 <div class="card-header">
-                    <h2>🎧 主听力材料</h2>
-                    <span class="duration">Lecture</span>
+                    <h2 id="lecture-title">🎧 Lecture Audio</h2>
+                    <button onclick="backToMenu()" class="back-link">↩ Back to Menu</button>
                 </div>
                 <div class="audio-wrapper">
-                    <p class="instruction">请先听完完整的讲座内容，再回答下方问题。</p>
-                    <audio controls class="main-audio">
-                        <source src="audio/L3.mp3" type="audio/mpeg">
+                    <p class="instruction">请仔细听完录音，准备好后点击下方按钮开始做题。</p>
+                    <audio id="main-audio-player" controls class="main-audio">
+                        <source src="" type="audio/mpeg">
                         您的浏览器不支持音频播放。
                     </audio>
                 </div>
-                
-                <details class="transcript-toggle">
-                    <summary>查看听力原文 (Transcript)</summary>
-                    <div class="transcript-content">
-                        <p><strong>Professor:</strong> ...But before we get into any techniques and exercises, what you're going to be learning in here this semester is what's known as method acting...</p>
-                        <p><strong>Professor:</strong> Well, no, you can't be Donna Smith from Kansas City, Missouri. But you can draw on certain parts of your personality, certain parts of your experience and emotional life. The key is, you have to find parts of you, your life that are analogous to those of your character, to your character's life.</p>
-                        <p><strong>Donna:</strong> Okay, but let's say I'm playing a character who's like, really brave, like she's not afraid of anybody.</p>
-                        <p><strong>Professor:</strong> Well, I'd be willing to bet that if you thought about it, you could think of a set of circumstances where you'd stand up and confront someone who is much more powerful than you. For example, suppose you had to do that to protect your family.</p>
-                    </div>
-                </details>
+                <button id="start-questions-btn" class="primary-btn">开始做题 (Start Quiz)</button>
             </section>
 
-            <section class="questions-section">
-                <h2>📝 练习与重听 (Replay Questions)</h2>
-
-                <div class="question-card" data-id="q5" data-answer="D">
-                    <div class="question-header">
-                        <span class="q-num">Question 5 of 6</span>
-                        <span class="q-type">Replay Question</span>
-                    </div>
-                    
-                    <div class="replay-area">
-                        <p class="replay-instruction">🔊 请听下方录音片段，回答问题：</p>
-                        <audio controls>
-                            <source src="audio/L3_replay_q5.mp3" type="audio/mpeg">
-                        </audio>
-                    </div>
-
-                    <p class="question-text"><strong>What does the professor mean when he says this?</strong></p>
-                    
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q5" value="A">
-                            <span class="bubble">A</span>
-                            <span class="text">Students should read a play before seeing it performed.</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q5" value="B">
-                            <span class="bubble">B</span>
-                            <span class="text">Students should memorize their lines before coming to class.</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q5" value="C">
-                            <span class="bubble">C</span>
-                            <span class="text">Actors should understand the meaning of their lines before memorizing them.</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q5" value="D">
-                            <span class="bubble">D</span>
-                            <span class="text">Actors should go beyond the literal meaning of the script.</span>
-                        </label>
-                    </div>
-                    <div class="feedback"></div>
+            <section id="question-view" class="card" style="display: none;">
+                <div class="card-header">
+                    <h2 id="q-progress">Question 1</h2>
+                    <span class="q-type" id="q-type-tag">Detail</span>
                 </div>
 
-                <div class="question-card" data-id="q6" data-answer="C">
-                    <div class="question-header">
-                        <span class="q-num">Question 6 of 6</span>
-                        <span class="q-type">Replay Question</span>
-                    </div>
-
-                    <div class="replay-area">
-                        <p class="replay-instruction">🔊 请听下方录音片段，回答问题：</p>
-                        <audio controls>
-                            <source src="audio/L3_replay_q6.mp3" type="audio/mpeg">
-                        </audio>
-                    </div>
-
-                    <p class="question-text"><strong>What does the professor imply when he says this?</strong></p>
-
-                    <div class="options">
-                        <label class="option">
-                            <input type="radio" name="q6" value="A">
-                            <span class="bubble">A</span>
-                            <span class="text">The student needs to think about what the writer intended.</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q6" value="B">
-                            <span class="bubble">B</span>
-                            <span class="text">The student needs to understand the character's circumstances.</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q6" value="C">
-                            <span class="bubble">C</span>
-                            <span class="text">The student may be able to express a greater range of emotion than she realizes.</span>
-                        </label>
-                        <label class="option">
-                            <input type="radio" name="q6" value="D">
-                            <span class="bubble">D</span>
-                            <span class="text">The student needs to speak with greater power when playing a brave character.</span>
-                        </label>
-                    </div>
-                    <div class="feedback"></div>
+                <div id="replay-audio-container" class="replay-area" style="display: none;">
+                    <p class="replay-instruction">🔊 Listen again to part of the lecture:</p>
+                    <audio id="replay-player" controls src=""></audio>
                 </div>
 
+                <p class="question-text" id="q-text">题目内容加载中...</p>
+                
+                <div class="options" id="options-container">
+                    </div>
+
+                <button id="next-btn" class="primary-btn" disabled>Next Question</button>
+            </section>
+
+            <section id="result-view" class="card" style="display: none;">
+                <h2>🎉 完成测试 (Completed)</h2>
+                
+                <div class="score-box">
+                    <div class="score-label">您的得分</div>
+                    <div class="score-display">
+                        <span id="final-score">0</span> / <span id="total-questions">0</span>
+                    </div>
+                </div>
+
+                <div id="review-container"></div>
+
+                <div class="action-area">
+                    <button onclick="backToMenu()" class="secondary-btn">返回菜单 (Menu)</button>
+                    <button onclick="restartCurrentQuiz()" class="primary-btn" style="margin-top:10px;">重做本篇 (Retry)</button>
+                </div>
             </section>
         </main>
-
-        <footer>
-            <button id="check-btn">Check Answers</button>
-        </footer>
     </div>
 
     <script src="quiz_script.js"></script>
